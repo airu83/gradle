@@ -1,0 +1,104 @@
+/* 변경 전
+plugins {
+	id 'org.springframework.boot' version '2.4.3'
+	id 'io.spring.dependency-management' version '1.0.11.RELEASE'
+	id 'java'
+	id 'war'
+}
+
+group = 'com.example'
+version = '0.0.1-SNAPSHOT'
+sourceCompatibility = '1.8'
+
+repositories {
+	mavenCentral()
+}
+
+dependencies {
+	implementation 'org.springframework.boot:spring-boot-starter-web'
+	providedRuntime 'org.springframework.boot:spring-boot-starter-tomcat'
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+}
+
+test {
+	useJUnitPlatform()
+}
+*/
+
+/* 변경 후
+- buildscript
+참고: https://docs.gradle.org/current/userguide/tutorial_using_tasks.html#sec:build_script_external_dependencies
+참고: https://docs.gradle.org/current/userguide/declaring_repositories.html
+Configures the build script classpath for this project.
+빌드 시점 외부 라이브러리 사용 시 
+- allprojects
+참고: https://docs.gradle.org/current/dsl/org.gradle.api.Project.html#N16D43
+Configures this project and each of its sub-projects.
+현재 프로젝트를 포함한 전체 프로젝트 필요한 설정 적용 시
+- subprojects
+참고: https://docs.gradle.org/current/dsl/org.gradle.api.Project.html#N16D43
+Configures the sub-projects of this project.
+subproject(include에 기재되어진) 설정 적용 시
+- project 
+프로젝트 사이의 의존성을 설정합니다.
+*/
+buildscript {
+    ext {
+        springBootVersion = '2.4.2'
+    }
+    repositories {
+        mavenCentral() // 참고: https://docs.gradle.org/current/userguide/declaring_repositories.html#sec:declaring_public_repository
+    }
+    dependencies {
+        classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
+    }
+}
+
+allprojects {
+    group = 'com.example'
+    version = '0.0.1-SNAPSHOT'
+}
+
+subprojects {
+    apply plugin: 'java'
+    apply plugin: 'org.springframework.boot'
+    apply plugin: 'io.spring.dependency-management'
+
+    sourceCompatibility = '1.8'
+
+    repositories {
+        mavenCentral()
+    }
+
+	
+    dependencies {      
+ 	implementation ('org.springframework.boot:spring-boot-starter-web')
+    testCompile('org.springframework.boot:spring-boot-starter-test')
+    }
+
+	// src 폴더 자동 생성
+    task initSourceFolders {
+        sourceSets*.java.srcDirs*.each {
+            if (!it.exists()) {
+                it.mkdirs()
+            }
+        }
+        sourceSets*.resources.srcDirs*.each {
+            if (!it.exists()) {
+                it.mkdirs()
+            }
+        }
+    }
+}
+
+project(':module_admin') {
+    dependencies {
+        compile project(':module_shared')
+    }
+}
+
+project(':module_client') {
+    dependencies {
+        compile project(':module_shared')
+    }
+}
