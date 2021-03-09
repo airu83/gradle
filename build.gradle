@@ -72,8 +72,12 @@ subprojects {
 
 	
     dependencies {      
+    //basic
  	implementation ('org.springframework.boot:spring-boot-starter-web')
     testCompile('org.springframework.boot:spring-boot-starter-test')
+    
+    //devtools
+    developmentOnly("org.springframework.boot:spring-boot-devtools")
     }
 
 	// src 폴더 자동 생성
